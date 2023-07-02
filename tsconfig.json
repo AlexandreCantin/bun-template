@@ -5,6 +5,16 @@
       "target": "esnext",
       "moduleResolution": "node",
       // "bun-types" is the important part
-      "types": ["bun-types"]
+      "types": ["bun-types"],
+
+      // Custom additions
+      "allowSyntheticDefaultImports":true,
+
+      // Local paths
+      "paths": {
+        "$src/*": ["./src/*"],
+        "$lib/*": ["./src/lib/*"],
+        "$user-context/*": ["./src/user-context/*"],
+      },
     }
   }
