@@ -9,9 +9,6 @@ export interface IFetchUserByEmail {
 export interface IFetchUserByUsername {
 	fetchUserByUsername(username: string): Promise<UserEntity | undefined>;
 }
-export interface IFetchUserBySlug {
-	fetchUserBySlug(slug: string): Promise<UserEntity | undefined>;
-}
 export interface IFetchUserByUid {
 	fetchUserByUid(id: string): Promise<UserEntity | undefined>;
 }

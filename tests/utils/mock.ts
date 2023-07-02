@@ -13,7 +13,6 @@ export const BASE_SQL_ADAPTER = {
 	fetchUserByUid: () => undefined,
 	fetchUserByEmail: () => undefined,
 	fetchUserByUsername: () => undefined,
-	fetchUserBySlug: () => undefined,
 	validateUser: () => undefined,
 	updateLastLoginDate: () => undefined,
 	saveUser: (user) => user,

@@ -5,7 +5,6 @@ import {
 	IFetchUserByUid,
 	IUpdateLastLoginDate,
 	IValidateUser,
-	IFetchUserBySlug,
 } from '$user-context/domain/interfaces';
 import { UserEntity } from '$user-context/domain/entities';
 import { EncryptedPassword, Locale } from '$user-context/domain/value-objects';
@@ -17,7 +16,6 @@ interface UserTable {
 	uid: Generated<string>;
 	username: string;
 	fullname: string;
-	slug_fullname: string;
 	password: string;
 	email: string;
 	locale: keyof typeof AVAILABLE_LOCALES;
@@ -43,7 +41,6 @@ export class UserContextKyselyAdapter
 		IFetchUserByUid,
 		IUpdateLastLoginDate,
 		IValidateUser,
-		IFetchUserBySlug
 {
 	private db: Kysely<Database>;
 
@@ -66,7 +63,6 @@ export class UserContextKyselyAdapter
 			uid: String(row.uid),
 			username: row.username,
 			fullname: row.fullname,
-			slugFullname: row.slug_fullname,
 			encryptedPassword: new EncryptedPassword(row.password),
 			email: row.email,
 			locale: new Locale(row.locale),
@@ -77,15 +73,6 @@ export class UserContextKyselyAdapter
 
 	async fetchUserByUid(uid: string): Promise<UserEntity | undefined> {
 		const user = await this.db.selectFrom('users').where('uid', '=', uid).selectAll('users').executeTakeFirst();
-		return user ? this._createUserFromRow(user) : undefined;
-	}
-
-	async fetchUserBySlug(slug: string): Promise<UserEntity> {
-		const user = await this.db
-			.selectFrom('users')
-			.where('slug_fullname', '=', slug)
-			.selectAll('users')
-			.executeTakeFirst();
 		return user ? this._createUserFromRow(user) : undefined;
 	}
 

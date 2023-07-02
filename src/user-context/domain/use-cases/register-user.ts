@@ -8,7 +8,6 @@ import { encryptPassword } from '$src/lib/encrypt';
 import {
 	ICreateValidationToken,
 	IFetchUserByEmail,
-	IFetchUserBySlug,
 	IFetchUserByUsername,
 	ISaveUser,
 	ISendValidationUserMail,
@@ -41,7 +40,7 @@ export type RegisterUserResponse = {
 
 export class RegisterUserUseCase {
 	private input: RegisterUserInput;
-	private spi: IFetchUserByEmail & IFetchUserByUsername & ISaveUser & IFetchUserBySlug;
+	private spi: IFetchUserByEmail & IFetchUserByUsername & ISaveUser;
 	private mailer: ISendValidationUserMail;
 	private tokenService: ICreateValidationToken;
 
@@ -52,7 +51,7 @@ export class RegisterUserUseCase {
 		tokenService,
 	}: {
 		input: RegisterUserInput;
-		spi: IFetchUserByEmail & IFetchUserByUsername & ISaveUser & IFetchUserBySlug;
+		spi: IFetchUserByEmail & IFetchUserByUsername & ISaveUser;
 		mailer: ISendValidationUserMail;
 		tokenService: ICreateValidationToken;
 	}) {
