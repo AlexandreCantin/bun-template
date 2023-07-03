@@ -16,7 +16,7 @@ import {
 	RegisterUserInput,
 	RegisterUserUseCase,
 } from '$user-context/domain/use-cases';
-import { UserContextKyselyAdapter } from '$user-context/adapters';
+import { UserContextIORedisAdapter, UserContextKyselyAdapter } from '$user-context/adapters';
 import { UserContextTokenService } from '$user-context/services';
 import { COOKIES, EXTRA_REQUEST_PARAMS } from './user-context/domain/const';
 import { addDaysToToday } from './lib/date';
@@ -44,6 +44,7 @@ export async function createNewServer({
 	rateLimiter: RateLimiterRedis;
 	userContext: {
 		sqlAdapter: UserContextKyselyAdapter;
+		storeSessionAdapter: UserContextIORedisAdapter;
 		tokenService: UserContextTokenService;
 		mailService: MailService;
 	};
@@ -69,6 +70,7 @@ export async function createNewServer({
 	// Request id
 	app.use('*', async (c: Context, next: Next) => {
 		c.set(EXTRA_REQUEST_PARAMS.REQUEST_ID, uniqId());
+		c.set(EXTRA_REQUEST_PARAMS.ENVIRONMENT, environment);
 		await next();
 	});
 	// Error handling
@@ -91,7 +93,7 @@ export async function createNewServer({
 	});
 
 	// Routes /user/
-	app.get('/user/validate-account', async (c: Context) => {
+	app.post('/user/validate-account', async (c: Context) => {
 		const body = await c.req.query();
 
 		const validateUserUseCase = new ValidateUserUseCase({
@@ -126,6 +128,7 @@ export async function createNewServer({
 			} as LoginUserInput,
 			spi: userContext.sqlAdapter,
 			tokenService: userContext.tokenService,
+			sessionStorageSpi: userContext.storeSessionAdapter,
 		});
 		// Sanitize and validate input
 		const loginInputError = await loginUseCase.sanitizeAndValidateInput();
@@ -186,8 +189,9 @@ export async function createNewServer({
 }
 
 function throwHttpException(error: AppError, c: Context): Response {
-	console.log('error', error);
-	// console.error(c.get(EXTRA_REQUEST_PARAMS.REQUEST_ID), error);
+	if (c.get(EXTRA_REQUEST_PARAMS.ENVIRONMENT) !== Environment.TESTING) {
+		console.error(c.get(EXTRA_REQUEST_PARAMS.REQUEST_ID), error);
+	}
 
 	if (error.visibleByUser) {
 		return c.json({ error: error.message }, +error.httpCode as StatusCode);

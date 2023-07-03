@@ -2,7 +2,7 @@ import AppError from '$src/app-error';
 
 import { sanitizeAndTrim } from '$lib/escaper';
 import { validate } from '$lib/fastest-validator-validate';
-import { ICreateValidationToken, IValidateUser, IFetchUserByUid } from '$user-context/domain/interfaces';
+import { ICreateUserValidationToken, IValidateUser, IFetchUserByUid } from '$user-context/domain/interfaces';
 
 // INPUT
 export interface ValidateUserInput {
@@ -20,7 +20,7 @@ export type ValidateUserResponse = {
 export class ValidateUserUseCase {
 	private input: ValidateUserInput;
 	private spi: IFetchUserByUid & IValidateUser;
-	private tokenService: ICreateValidationToken;
+	private tokenService: ICreateUserValidationToken;
 
 	constructor({
 		input,
@@ -29,7 +29,7 @@ export class ValidateUserUseCase {
 	}: {
 		input: ValidateUserInput;
 		spi: IFetchUserByUid & IValidateUser;
-		tokenService: ICreateValidationToken;
+		tokenService: ICreateUserValidationToken;
 	}) {
 		this.input = input;
 		this.spi = spi;
@@ -58,7 +58,7 @@ export class ValidateUserUseCase {
 
 	async process(): Promise<ValidateUserResponse | AppError> {
 		// 1 - Decode token
-		const validationData = this.tokenService.decodeValidationToken(this.input.token);
+		const validationData = this.tokenService.decodeUserValidationToken(this.input.token);
 		if (validationData instanceof AppError) {
 			return new AppError({
 				visibleByUser: true,

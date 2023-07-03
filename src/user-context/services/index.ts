@@ -1,1 +1,1 @@
-export { UserContextTokenService } from "../services/macaroon-service";
+export { UserContextTokenService } from '../services/macaroon-service';

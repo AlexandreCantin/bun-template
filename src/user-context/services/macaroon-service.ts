@@ -2,12 +2,12 @@ import { MacaroonsBuilder, MacaroonsVerifier, Macaroon, CaveatPacket } from 'mac
 import TimestampCaveatVerifier from 'macaroons.js/lib/verifier/TimestampCaveatVerifier';
 
 import AppError from '$src/app-error';
-import { ISessionToken, ICreateValidationToken } from '$user-context/domain/interfaces';
+import { ISessionToken, ICreateUserValidationToken } from '$user-context/domain/interfaces';
 import { Token } from '$user-context/domain/value-objects';
 import { SessionData } from '$user-context/domain/entities';
 import { ValidateUserEmailData } from '../domain/entities/validate-user-email-data';
 
-export class UserContextTokenService implements ISessionToken, ICreateValidationToken {
+export class UserContextTokenService implements ISessionToken, ICreateUserValidationToken {
 	private _decodeAndValidateToken(token: string, secret: string): Macaroon | AppError {
 		const macaroon = MacaroonsBuilder.deserialize(token);
 		const verifier = new MacaroonsVerifier(macaroon);
@@ -62,12 +62,11 @@ export class UserContextTokenService implements ISessionToken, ICreateValidation
 	public decodeSessionToken(token: string): SessionData | AppError {
 		const macaroon = this._decodeAndValidateToken(token, process.env.MACAROON_USER_SECRET);
 		const caveats: Record<string, string> = this._extractCaveats(macaroon);
-
 		return new SessionData(caveats.userId, new Date(caveats.time));
 	}
 
 	// USER VALIDATION TOKEN
-	public createValidationToken(data: ValidateUserEmailData): Token {
+	public createUserValidationToken(data: ValidateUserEmailData): Token {
 		const macaroon = new MacaroonsBuilder(
 			process.env.MACAROON_LOCATION,
 			process.env.MACAROON_VALIDATION_MAIL_SECRET,
@@ -80,10 +79,14 @@ export class UserContextTokenService implements ISessionToken, ICreateValidation
 		return new Token(macaroon.serialize());
 	}
 
-	public decodeValidationToken(token: string): ValidateUserEmailData | AppError {
-		const macaroon = this._decodeAndValidateToken(token, process.env.MACAROON_VALIDATION_MAIL_SECRET);
-		const caveats: Record<string, string> = this._extractCaveats(macaroon);
+	public decodeUserValidationToken(token: string): ValidateUserEmailData | AppError {
+		const result = this._decodeAndValidateToken(token, process.env.MACAROON_VALIDATION_MAIL_SECRET);
 
+		if (result instanceof AppError) {
+			return result;
+		}
+
+		const caveats: Record<string, string> = this._extractCaveats(result);
 		return new ValidateUserEmailData(caveats.userId, new Date(caveats.time));
 	}
 }

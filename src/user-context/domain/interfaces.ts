@@ -27,9 +27,9 @@ export interface ISessionToken {
 	createSessionToken(data: SessionData): Token;
 	decodeSessionToken(token: string): SessionData | AppError;
 }
-export interface ICreateValidationToken {
-	createValidationToken(data: ValidateUserEmailData): Token;
-	decodeValidationToken(token: string): ValidateUserEmailData | AppError;
+export interface ICreateUserValidationToken {
+	createUserValidationToken(data: ValidateUserEmailData): Token;
+	decodeUserValidationToken(token: string): ValidateUserEmailData | AppError;
 }
 
 // Mail ADAPTER
@@ -40,4 +40,10 @@ export interface ISendMail {
 // Mail SERVICE
 export interface ISendValidationUserMail {
 	sendValidationUserMail(data: { to: string[]; token: Token }): Promise<void>;
+}
+
+// Session SERVICE
+export interface IFtechStorageSession {
+	saveSessionInStore(sessionId: string, token: Token): Promise<void>;
+	getSessionInStore(sessionId: string): Promise<Token>;
 }

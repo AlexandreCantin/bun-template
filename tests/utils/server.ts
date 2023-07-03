@@ -27,6 +27,14 @@ export async function doGet(app: any, path: string) {
 
 async function _doRequest(app: any, req: Request) {
 	const response = await app.fetch(req);
+
+	if (response.status === 404) {
+		return {
+			statusCode: response.status,
+			json: {},
+		};
+	}
+
 	return {
 		statusCode: response.status,
 		json: await response.json(),

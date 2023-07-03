@@ -1,9 +1,7 @@
 import { beforeAll, describe, expect, test } from 'bun:test';
-import { createNewTestServer, doPost } from '../utils/server';
-import { disableConsoleOutput } from '../utils/before-all';
-import { EMAIL_FAKER } from '../utils/faker/faker-email';
-import { BASE_USER_CONTEXT } from '../utils/mock';
-import exp from 'constants';
+import { disableConsoleOutput } from '../../utils/before-all';
+import { createNewTestServer, doPost } from '../../utils/server';
+import { EMAIL_FAKER } from '../../utils/faker/faker-email';
 
 const BASE_INPUT = {
 	username: 'username',

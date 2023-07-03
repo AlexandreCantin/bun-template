@@ -9,7 +9,7 @@ import { MailAdapter } from './user-context/adapters/mailer-adapter';
 import { MailService } from './user-context/services/mail-templating-service';
 import { Kysely } from 'kysely';
 import { PostgresJSDialect } from 'kysely-postgres-js';
-import { UserContextKyselyAdapter, Database } from './user-context/adapters';
+import { UserContextKyselyAdapter, Database, UserContextIORedisAdapter } from './user-context/adapters';
 
 const port = parseInt(process.env.PORT) || 3000;
 const environment = process.env.ENV as Environment;
@@ -28,17 +28,20 @@ const db = new Kysely<Database>({
 	}),
 });
 
+// *** REDIS CONNECTION
+const redis = new Redis({ enableOfflineQueue: false });
+
 // *** MAIL ADAPTER
 const mailAdapter = new MailAdapter();
 
 // *** USER CONTEXT
 const userContextSqlAdapter = new UserContextKyselyAdapter(db);
+const userContextStoreSessionAdapter = new UserContextIORedisAdapter(redis);
 const userContextTokenService = new UserContextTokenService();
 const userContextMailService = new MailService(mailAdapter);
 
 // *** RATE LIMITING
 // https://github.com/animir/node-rate-limiter-flexible/wiki/Overall-example#different-limits-for-different-parts-of-application
-const redis = new Redis({ enableOfflineQueue: false });
 const rateLimiterRedis = new RateLimiterRedis({
 	storeClient: redis,
 	points: environment.toString() === 'production' ? 100 : +Infinity, // Number of points
@@ -51,6 +54,7 @@ const app = await createNewServer({
 	rateLimiter: rateLimiterRedis,
 	userContext: {
 		sqlAdapter: userContextSqlAdapter,
+		storeSessionAdapter: userContextStoreSessionAdapter,
 		tokenService: userContextTokenService,
 		mailService: userContextMailService,
 	},

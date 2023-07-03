@@ -1,2 +1,3 @@
-export * from "./kysely-adapter";
-export { MailAdapter } from "./mailer-adapter";
+export * from './kysely-adapter';
+export * from './redis-adapter';
+export { MailAdapter } from './mailer-adapter';

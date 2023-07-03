@@ -34,13 +34,7 @@ export interface Database {
 /** END INTERFACE */
 
 export class UserContextKyselyAdapter
-	implements
-		IFetchUserByEmail,
-		IFetchUserByUsername,
-		ISaveUser,
-		IFetchUserByUid,
-		IUpdateLastLoginDate,
-		IValidateUser,
+	implements IFetchUserByEmail, IFetchUserByUsername, ISaveUser, IFetchUserByUid, IUpdateLastLoginDate, IValidateUser
 {
 	private db: Kysely<Database>;
 

@@ -6,7 +6,7 @@ import { validate } from '$lib/fastest-validator-validate';
 import { encryptPassword } from '$src/lib/encrypt';
 
 import {
-	ICreateValidationToken,
+	ICreateUserValidationToken,
 	IFetchUserByEmail,
 	IFetchUserByUsername,
 	ISaveUser,
@@ -42,7 +42,7 @@ export class RegisterUserUseCase {
 	private input: RegisterUserInput;
 	private spi: IFetchUserByEmail & IFetchUserByUsername & ISaveUser;
 	private mailer: ISendValidationUserMail;
-	private tokenService: ICreateValidationToken;
+	private tokenService: ICreateUserValidationToken;
 
 	constructor({
 		input,
@@ -53,7 +53,7 @@ export class RegisterUserUseCase {
 		input: RegisterUserInput;
 		spi: IFetchUserByEmail & IFetchUserByUsername & ISaveUser;
 		mailer: ISendValidationUserMail;
-		tokenService: ICreateValidationToken;
+		tokenService: ICreateUserValidationToken;
 	}) {
 		this.input = input;
 		this.spi = spi;
@@ -106,24 +106,21 @@ export class RegisterUserUseCase {
 			});
 		}
 
-		// 3 - Create slug for user
-
-		// 4 - Encrypt password
+		// 3 - Encrypt password
 		const encryptedPassword = await encryptPassword(this.input.password);
 
-		// 5 - Save user
+		// 4 - Save user
 		const newUser = new UserEntity({
 			username: this.input.username,
 			fullname: this.input.fullname,
-			slugFullname: this.input.fullname,
 			encryptedPassword: new EncryptedPassword(encryptedPassword),
 			email: this.input.email,
 			locale: new Locale(this.input.locale),
 		});
 		const createdUser = await this.spi.saveUser(newUser);
 
-		// 6 - Send validation mail
-		const validationToken = this.tokenService.createValidationToken(
+		// 5 - Send validation mail
+		const validationToken = this.tokenService.createUserValidationToken(
 			new ValidateUserEmailData(createdUser.getUid(), addDaysToToday(10))
 		);
 		this.mailer.sendValidationUserMail({

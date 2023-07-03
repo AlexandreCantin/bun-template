@@ -5,7 +5,6 @@ export class UserEntity {
 	private uid: string;
 	private username: string;
 	private fullname: string;
-	private slugFullname: string;
 	private encryptedPassword: EncryptedPassword;
 	private email: string;
 	private locale: Locale;
@@ -16,7 +15,6 @@ export class UserEntity {
 		uid,
 		username,
 		fullname,
-		slugFullname,
 		encryptedPassword,
 		email,
 		locale,
@@ -26,7 +24,6 @@ export class UserEntity {
 		uid?: string | undefined;
 		username: string | undefined;
 		fullname: string;
-		slugFullname: string;
 		encryptedPassword: EncryptedPassword;
 		email: string;
 		locale: Locale;
@@ -36,7 +33,6 @@ export class UserEntity {
 		this.uid = uid;
 		this.username = username;
 		this.fullname = fullname;
-		this.slugFullname = slugFullname;
 		this.encryptedPassword = encryptedPassword;
 		this.email = email;
 		this.locale = locale;
@@ -52,9 +48,6 @@ export class UserEntity {
 	}
 	public getFullname(): string {
 		return this.fullname;
-	}
-	public getSlugFullname(): string {
-		return this.slugFullname;
 	}
 	public getEncryptedPassword(): EncryptedPassword {
 		return this.encryptedPassword;

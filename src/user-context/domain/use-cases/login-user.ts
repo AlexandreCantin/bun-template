@@ -9,10 +9,12 @@ import {
 	IFetchUserByUsername,
 	ISaveUser,
 	IUpdateLastLoginDate,
+	IFtechStorageSession,
 } from '$user-context/domain/interfaces';
 import { MyProfileInfos } from '$src/user-context/types';
 import { SessionData } from '../entities';
 import { addDaysToToday } from '$src/lib/date';
+import { uniqId } from '$src/lib/uniq-id';
 
 // INPUT
 export interface LoginUserInput {
@@ -27,26 +29,30 @@ const loginUserInputValidator = {
 
 export type LoginUserResponse = {
 	user: MyProfileInfos;
-	token: string;
+	sessionId: string;
 };
 
 export class LoginUserUseCase {
 	private input: LoginUserInput;
 	private spi: IFetchUserByEmail & IFetchUserByUsername & ISaveUser & IUpdateLastLoginDate;
+	private sessionStorageSpi: IFtechStorageSession;
 	private tokenService: ISessionToken;
 
 	constructor({
 		input,
 		spi,
 		tokenService,
+		sessionStorageSpi,
 	}: {
 		input: LoginUserInput;
 		spi: IFetchUserByEmail & IFetchUserByUsername & ISaveUser & IUpdateLastLoginDate;
 		tokenService: ISessionToken;
+		sessionStorageSpi: IFtechStorageSession;
 	}) {
 		this.input = input;
 		this.spi = spi;
 		this.tokenService = tokenService;
+		this.sessionStorageSpi = sessionStorageSpi;
 	}
 
 	private sanitizeInput() {
@@ -94,13 +100,17 @@ export class LoginUserUseCase {
 		// 3 - Create token
 		const token = await this.tokenService.createSessionToken(new SessionData(user.getUid(), addDaysToToday(90)));
 
-		// 4 - Update last login date
+		// 4 - Store token in external session storage
+		const sessionId = uniqId(50);
+		this.sessionStorageSpi.saveSessionInStore(sessionId, token);
+
+		// 5 - Update last login date
 		this.spi.updateLastLoginDate(user.getUid());
 
-		// 5 - Return user profile
+		// 6 - Return user profile
 		return {
 			user: user.getMyProfileInfos(),
-			token: token.getValue(),
+			sessionId,
 		};
 	}
 }
